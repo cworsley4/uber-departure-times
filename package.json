@@ -18,5 +18,9 @@
   "bugs": {
     "url": "https://github.com/cworsley4/uber-departure-times/issues"
   },
-  "homepage": "https://github.com/cworsley4/uber-departure-times"
+  "homepage": "https://github.com/cworsley4/uber-departure-times",
+  "dependencies": {
+    "koa": "^0.19.0",
+    "xml2json": "^0.6.1"
+  }
 }
