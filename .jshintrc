@@ -26,12 +26,12 @@
   "unused": false,
   "trailing": true,
 
-
   "globals": {
     "describe": false,
     "beforeEach": false,
     "afterEach": false,
     "it": false,
+    "google": true,
     "before": false,
     "after": false,
     "window": true,
