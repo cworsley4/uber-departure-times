@@ -1,14 +1,14 @@
 
 var koa = require('koa');
 var http = require('http');
-var Primus = require('primus');
 var serve = require('koa-static');
 var xml2json = require('xml2json');
 var session = require('koa-session');
+var Agency = require('./lib/agency');
+var socket = require('./lib/socket');
 var debug = require('debug')('uber:main');
 var request = require('superagent-promise');
 var nextbus = require('./lib/apis/nextbus');
-var PrimusEmitter = require('primus-emitter');
 var config = require('envcfg')(__dirname + '/config/api.json');
 
 var primus;
@@ -25,7 +25,6 @@ app.use(serve('./public'));
 
 // koa app routes
 
-
 // Initialize server
 nextbus
   .agencies()
@@ -35,25 +34,21 @@ nextbus
       agencies = JSON.parse(xml2json.toJson(res.text));
       agencies = agencies.body.agency;
       for (var i = 0; i < agencies.length; i++) {
-        // tempAgencies[agencies[i].tag] = new Agency(agencies[i]);
+        tempAgencies[agencies[i].tag] = new Agency(agencies[i]);
       }
       agencies = tempAgencies;
     } catch (e) {
       console.error('Could not parse agencies', e);
-      process.kill();
+      process.kill(); // invalid pid, resulting in actual crash
     }
 
     var server = http
       .createServer(app.callback())
       .listen(port);
 
+    primus = socket(server);
+
     debug('Listening on %d', port);
-
-    primus = new Primus(server, {
-      transformer: 'engine.io'
-    });
-    primus.use('emitter', PrimusEmitter);
-
     registerEvents();
   });
 

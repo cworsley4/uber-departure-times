@@ -39,6 +39,12 @@
               primus.send('register', {
                 agency: 'sf-muni'
               });
+
+              setTimeout(function () {
+                primus.send('register:route', {
+                  route: 67
+                });
+              }, 1000);
             });
           });
         } else {
