@@ -2,10 +2,12 @@
 var koa = require('koa');
 var http = require('http');
 var serve = require('koa-static');
+var Router = require('koa-route');
 var xml2json = require('xml2json');
 var session = require('koa-session');
 var Agency = require('./lib/agency');
 var socket = require('./lib/socket');
+var emitter = require('./lib/emitter');
 var debug = require('debug')('uber:main');
 var request = require('superagent-promise');
 var nextbus = require('./lib/apis/nextbus');
@@ -24,56 +26,79 @@ app.use(session(app));
 app.use(serve('./public'));
 
 // koa app routes
+app.use(
+  Router.get('/agencies', function *() {
+    this.body = agencies;
+  })
+);
 
-// Initialize server
+app.use(
+  Router.get('/routes/:aid', function *(agencyId) {
+    this.body = yield agencies[agencyId].getRoutes();
+  })
+);
+
+app.use(
+  Router.get('/stops/:aid/:rid', function *(agencyId, routeId) {
+    yield agencies[agencyId].getRoutes();
+    this.body = 
+  })
+);
+
+// Initialize server and events
 nextbus
   .agencies()
-  .then(function (res) {
-    try {
-      var tempAgencies = {};
-      agencies = JSON.parse(xml2json.toJson(res.text));
-      agencies = agencies.body.agency;
-      for (var i = 0; i < agencies.length; i++) {
-        tempAgencies[agencies[i].tag] = new Agency(agencies[i]);
-      }
-      agencies = tempAgencies;
-    } catch (e) {
-      console.error('Could not parse agencies', e);
-      process.kill(); // invalid pid, resulting in actual crash
+  .then(bootstrap)
+  .then(registerEvents);
+
+function bootstrap(res) {
+  try {
+    var tempAgencies = {};
+    agencies = JSON.parse(xml2json.toJson(res.text));
+    agencies = agencies.body.agency;
+    
+    for (var i = 0; i < agencies.length; i++) {
+      tempAgencies[agencies[i].tag] = new Agency(agencies[i]);
     }
+    
+    agencies = tempAgencies;
+  } catch (e) {
+    return console.error('Could not parse agencies', e.stack, e.message);
+  }
 
-    var server = http
-      .createServer(app.callback())
-      .listen(port);
+  var server = http
+    .createServer(app.callback())
+    .listen(port);
 
-    primus = socket(server);
+  primus = socket(server);
 
-    debug('Listening on %d', port);
-    registerEvents();
-  });
+  debug('Listening on %d', port);
+}
 
 function registerEvents() {
   primus.on('connection', function (spark) {
-    spark.on('register', function (payload) {
-      var agency = agencies[payload.agency];
-      if (!agency) {
-        console.error('Agency \'%s\' not found, cannot register',
-          payload.agency);
-        return;
-      }
-
-      agency.add(spark);
+    spark.on('disconnect', function () {
+      debug('Client disconnected', spark.id);
     });
 
-    spark.on('disconnect', function (payload) {
-      var agency = agencies[payload.agency];
-      if (!agency) {
-        console.error('Agency \'%s\' not found, cannot unregister',
-          payload.agency);
-        return;
+    spark.on('register:stop', function (payload) {
+      debug('Register stop event');
+      payload = payload || {};
+      
+      if (!payload.agency) {
+        // Kill spark connection to server
+        return console.error('No agency tag in payload');
       }
-
-      agency.remove(spark);
+      
+      var agency = agencies[payload.agency];
+      var event = 'register:agency:' +
+        payload.agency +
+        ':stop:' +
+        payload.stop;
+      debug(event, 'emitting');
+      emitter.emit(event, spark);
+      // agency.add(spark);
     });
+
   });
 }

@@ -17,9 +17,10 @@
 
     <script type="text/javascript" src="/primus/primus.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCWkOJErg5zPmd86G5Ag-Fa5n-QPOqKF9M"></script>
     <script type="text/javascript">
-      (function (global, undefined) {
+      (function (global, $, Primus, undefined) {
         function initialize (location, zoom) {
           zoom = zoom || 8;
           var mapOptions = {
@@ -31,26 +32,67 @@
             mapOptions);
         }
 
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(function (position) {
-            initialize(position.coords, 13);
-            var primus = Primus.connect();
-            primus.on('open', function () {
-              primus.send('register', {
-                agency: 'sf-muni'
-              });
+        function wsConnect() {
+          var primus = Primus.connect();
 
-              setTimeout(function () {
-                primus.send('register:route', {
-                  route: 67
-                });
-              }, 1000);
+          primus.on('open', function () {
+            primus.send('register:stop', {
+              agency: global.agencies['sf-muni'].tag,
+              route: 'F',
+              stop: 3311
+            }, function ack() {
+              console.log(arguments);
             });
+          });
+        }
+
+        function getAgencies() {
+          return $.get('/agencies')
+            .then(function (agencies, status) {
+              if (status === 'success') {
+                global.agencies = agencies;
+              }
+            });
+        }
+
+        function selectAgencyAndGetRoutes(agencyId) {
+          return $.get('/routes/' + agencyId)
+            .then(function (routes, status) {
+              if (status === 'success') {
+                global.agencies[agencyId].routes = routes;
+              }
+            });
+        }
+
+        function selectRoute(agencyId, routeId) {
+          return $.get('/stops/' + agencyId + '/' + routeId)
+            .then(function (stops, status) {
+              console.info(stops, status);
+            });
+        }
+
+        if (global.navigator.geolocation) {
+          global.navigator.geolocation.getCurrentPosition(function (position) {
+            initialize(position.coords, 13);
+
+            function *setup() {
+              yield getAgencies();
+              yield selectAgencyAndGetRoutes('sf-muni');
+              yield selectRoute('sf-muni', 'F');
+              wsConnect(); 
+            }
+
+            var setting = setup();
+            setting.next();
+            setting.next();
+            setting.next();
+            setting.next();
+            setting.next();
           });
         } else {
           // IP Geolocation fallback
         }
-      })(window);
+      })(window, window.jQuery, window.Primus);
     </script>
   </body>
 </html>
