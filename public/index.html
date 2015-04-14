@@ -36,6 +36,11 @@
           var primus = Primus.connect();
 
           primus.on('open', function () {
+
+            primus.on('agency:sf-muni:stop:3311', function (data) {
+              console.log(data, arguments);
+            });
+
             primus.send('register:stop', {
               agency: global.agencies['sf-muni'].tag,
               route: 'F',
@@ -51,7 +56,10 @@
             .then(function (agencies, status) {
               if (status === 'success') {
                 global.agencies = agencies;
+                console.info(global.agencies);
               }
+
+              return;
             });
         }
 
@@ -60,7 +68,10 @@
             .then(function (routes, status) {
               if (status === 'success') {
                 global.agencies[agencyId].routes = routes;
+                console.info(routes);
               }
+
+              return;
             });
         }
 
@@ -79,15 +90,13 @@
               yield getAgencies();
               yield selectAgencyAndGetRoutes('sf-muni');
               yield selectRoute('sf-muni', 'F');
-              wsConnect(); 
             }
 
             var setting = setup();
             setting.next();
             setting.next();
             setting.next();
-            setting.next();
-            setting.next();
+            wsConnect();
           });
         } else {
           // IP Geolocation fallback

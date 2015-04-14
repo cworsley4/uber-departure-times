@@ -40,8 +40,7 @@ app.use(
 
 app.use(
   Router.get('/stops/:aid/:rid', function *(agencyId, routeId) {
-    yield agencies[agencyId].getRoutes();
-    this.body = 
+    this.body = yield agencies[agencyId].populateRoute(routeId);
   })
 );
 
@@ -63,7 +62,8 @@ function bootstrap(res) {
     
     agencies = tempAgencies;
   } catch (e) {
-    return console.error('Could not parse agencies', e.stack, e.message);
+    console.error('Could not parse agencies', e.stack, e.message);
+    return;
   }
 
   var server = http
@@ -87,17 +87,16 @@ function registerEvents() {
       
       if (!payload.agency) {
         // Kill spark connection to server
-        return console.error('No agency tag in payload');
+        console.error('No agency tag in payload');
+        return;
       }
       
-      var agency = agencies[payload.agency];
-      var event = 'register:agency:' +
+      var event = 'agency:' +
         payload.agency +
         ':stop:' +
         payload.stop;
       debug(event, 'emitting');
       emitter.emit(event, spark);
-      // agency.add(spark);
     });
 
   });
