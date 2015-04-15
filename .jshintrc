@@ -36,6 +36,7 @@
     "after": false,
     "window": true,
     "document": false,
-    "articulate": false
+    "angular": true,
+    "UberApp": true
   }
 }

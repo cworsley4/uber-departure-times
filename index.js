@@ -62,7 +62,7 @@ function bootstrap(res) {
     
     agencies = tempAgencies;
   } catch (e) {
-    console.error('Could not parse agencies', e.stack, e.message);
+    console.error('Could not parse agencies', e.message);
     return;
   }
 

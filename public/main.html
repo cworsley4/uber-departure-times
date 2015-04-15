@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="UberApp">
+  <head>
+    <title>Uber Coding Challenge - Departure Times</title>
+    <!-- Libs -->
+    <script type="text/javascript" src="/primus/primus.js"></script>
+
+    <!-- Angular -->
+    <script src="/bower_components/angular/angular.min.js" type="text/javascript"></script>
+    <script src="/bower_components/angular-primus/angular-primus.js" type="text/javascript"></script>
+
+    <!-- Application -->
+    <script src="/app/app.js" type="text/javascript"></script>
+    <script src="/app/configs/primus.js" type="text/javascript"></script>
+    <script src="/app/controllers/modal.js" type="text/javascript"></script>
+    <script src="/app/controllers/main.js" type="text/javascript"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet" />
+    <style type="text/css">
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #step1 {
+        height: 300px;
+        overflow: scroll;
+      }
+    </style>
+  </head>
+  <body ng-controller="MainController">
+    <h2>Departure Times</h2>
+
+    <ol class="breadcrumb">
+      <li>[{{ chosen.agency.title || 'Agency' }}]</li>
+      <li>[{{ chosen.route.title || 'Route' }}]</li>
+      <li>[{{ chosen.stop.title || 'Stop' }}]</li>
+    </ol>
+
+    <div class="steps" ng-switch="step">
+      <div ng-switch-when="1">
+        <ul class="list-group container" id="step1">
+          <li ng-repeat="agency in agencies" ng-click="selectAgency(agency)" class="list-group-item">{{ agency.title }}</li>
+        </ul>
+      </div>
+      <div ng-switch-when="2">
+        <ul class="list-group">
+          <li ng-repeat="route in routes" ng-click="selectRoute(route)" class="list-group-item">{{ route.tag }}</li>
+        </ul>
+      </div>
+      <div ng-switch-when="3">
+        <ul class="list-group">
+          <li ng-repeat="stop in stops" ng-click="selectStop(stop)" class="list-group-item">{{ agency.title }}</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
