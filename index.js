@@ -48,6 +48,7 @@ app.use(
 // Initialize server and events
 nextbus
   .agencies()
+  .exec()
   .then(bootstrap)
   .then(registerEvents);
 
@@ -111,8 +112,11 @@ function registerEvents() {
         spark.join(event, function () {
           debug(spark.id + ' joined the room: ', event);
         });
+
+        // Spawn worker
+        manager.spawn(event, payload);
       });
-      
+
       // Make sure there is only one listener for the update event
       // to prevent duplicate events being emitted to clients
       emitter.removeAllListeners(update);
@@ -134,9 +138,6 @@ function registerEvents() {
           console.error(e.message, e.stack);
         }
       });
-
-      // Spawn worker
-      manager.spawn(event, payload);
     });
 
   });

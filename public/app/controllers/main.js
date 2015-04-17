@@ -2,8 +2,11 @@
 UberApp.controller('MainController', function (
   $scope,
   $http,
+  $window,
   $log,
-  primus) {
+  ipCookie,
+  primus
+) {
 
   $scope.step = 1;
   $scope.agencies = {};
@@ -12,7 +15,6 @@ UberApp.controller('MainController', function (
   $scope.chosen = {};
 
   $scope.selectAgency = function (agency) {
-    $log.info(agency);
     $http
       .get('/routes/' + agency.tag)
       .success(function (routes) {
@@ -34,20 +36,23 @@ UberApp.controller('MainController', function (
       });
   };
 
-  // $scope.selectStop = function (stop)
+  $scope.selectStop = function (stop) {
+    $scope.chosen.stop = stop;
+    var chosen = $scope.chosen;
+    ipCookie('agency', chosen.agency);
+    ipCookie('route', chosen.route);
+    ipCookie('stop', chosen.stop);
 
-  $scope.selectStep = function (step) {
-    $scope.step = step;
+    
   };
 
-  function start() {
+  // Self execution
+  (function start() {
     $http
       .get('/agencies')
       .success(function (agencies) {
         $scope.agencies = agencies;
       });
-  }
-
-  start();
+  })();
 
 });

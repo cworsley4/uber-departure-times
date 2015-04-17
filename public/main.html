@@ -7,24 +7,23 @@
 
     <!-- Angular -->
     <script src="/bower_components/angular/angular.min.js" type="text/javascript"></script>
+    <script src="/bower_components/angular-cookie/angular-cookie.js" type="text/javascript"></script>
     <script src="/bower_components/angular-primus/angular-primus.js" type="text/javascript"></script>
 
     <!-- Application -->
     <script src="/app/app.js" type="text/javascript"></script>
     <script src="/app/configs/primus.js" type="text/javascript"></script>
-    <script src="/app/controllers/modal.js" type="text/javascript"></script>
     <script src="/app/controllers/main.js" type="text/javascript"></script>
     <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet" />
     <style type="text/css">
+      .center {
+        text-align: center;
+      }
+
       html, body, #map-canvas {
         height: 100%;
         margin: 0;
         padding: 0;
-      }
-
-      #step1 {
-        height: 300px;
-        overflow: scroll;
       }
     </style>
   </head>
@@ -37,7 +36,9 @@
       <li>[{{ chosen.stop.title || 'Stop' }}]</li>
     </ol>
 
-    <div class="steps" ng-switch="step">
+    <h4 class="center">Lets get you on that bus!!</h4>
+
+    <div class="steps container" ng-switch="step">
       <div ng-switch-when="1">
         <ul class="list-group container" id="step1">
           <li ng-repeat="agency in agencies" ng-click="selectAgency(agency)" class="list-group-item">{{ agency.title }}</li>
@@ -50,7 +51,7 @@
       </div>
       <div ng-switch-when="3">
         <ul class="list-group">
-          <li ng-repeat="stop in stops" ng-click="selectStop(stop)" class="list-group-item">{{ agency.title }}</li>
+          <li ng-repeat="stop in stops.stops" ng-click="selectStop(stop)" class="list-group-item">{{ stop.stop.title }}</li>
         </ul>
       </div>
     </div>
