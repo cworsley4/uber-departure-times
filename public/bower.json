@@ -27,6 +27,7 @@
     "ngGoogleMap": "~0.0.5",
     "angular-primus": "~0.2.2",
     "ng-grid": "~2.0.14",
-    "ui.bootstrap": "~0.12.1"
+    "ui.bootstrap": "~0.12.1",
+    "angular-cookie": "~4.0.6"
   }
 }

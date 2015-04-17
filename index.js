@@ -2,12 +2,12 @@
 var koa = require('koa');
 var http = require('http');
 var serve = require('koa-static');
-var Router = require('koa-route');
 var xml2json = require('xml2json');
 var session = require('koa-session');
 var Agency = require('./lib/agency');
-var socket = require('./lib/socket');
+var socket = require('./lib/primus');
 var emitter = require('./lib/emitter');
+var Manager = require('./lib/manager');
 var debug = require('debug')('uber:main');
 var request = require('superagent-promise');
 var nextbus = require('./lib/apis/nextbus');
@@ -76,27 +76,58 @@ function bootstrap(res) {
 }
 
 function registerEvents() {
-  primus.on('connection', function (spark) {
-    spark.on('disconnect', function () {
-      debug('Client disconnected', spark.id);
-    });
+  debug('Registering events');
+  var manager = new Manager();
 
-    spark.on('register:stop', function (payload) {
+  primus.on('leaveroom', function (room, spark) {
+    var clients = primus.room(room).clients();
+    if (!clients.length) {
+      // Kill the worker
+      manager.reap(room);
+    }
+  });
+
+  primus.on('connection', function (spark) {
+    debug('Connected to the socket server');
+
+    // Routes
+    
+
+    // Client requests to be registered for all data pertaining
+    // to the stop identified in the paylaod
+    spark.on('subscribe:stop', function (payload) {
       debug('Register stop event');
       payload = payload || {};
       
-      if (!payload.agency) {
-        // Kill spark connection to server
-        console.error('No agency tag in payload');
+      // Confirm the payload's validity
+      if (!payload.agency || !payload.route || !payload.stop) {
+        console.error('Insuffecient payload', payload);
         return;
       }
-      
+
       var event = 'agency:' +
         payload.agency +
         ':stop:' +
         payload.stop;
-      debug(event, 'emitting');
-      emitter.emit(event, spark);
+
+      var update = event + ':' + 'update';
+
+      // Ensure that a client can only recieve updates from one stop
+      spark.leaveAll();
+      // Join primus room
+      spark.join(spark, event);
+
+      // Make sure there is only one listener for the update event
+      // to prevent duplicate events being emitted to clients
+      emitter.removeAllListeners(update);
+      // Add emitter for worker updates
+      emitter.on(update, function () {
+        if (primus.room)
+        primus.room(event).write(['hiya', payload]);
+      });
+
+      // Spawn worker
+      manager.spawn(event, payload);
     });
 
   });
