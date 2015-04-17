@@ -26,23 +26,23 @@ app.use(session(app));
 app.use(serve('./public'));
 
 // koa app routes
-app.use(
-  Router.get('/agencies', function *() {
-    this.body = agencies;
-  })
-);
+// app.use(
+//   Router.get('/agencies', function *() {
+//     this.body = agencies;
+//   })
+// );
 
-app.use(
-  Router.get('/routes/:aid', function *(agencyId) {
-    this.body = yield agencies[agencyId].getRoutes();
-  })
-);
+// app.use(
+//   Router.get('/routes/:aid', function *(agencyId) {
+//     this.body = yield agencies[agencyId].getRoutes();
+//   })
+// );
 
-app.use(
-  Router.get('/stops/:aid/:rid', function *(agencyId, routeId) {
-    this.body = yield agencies[agencyId].populateRoute(routeId);
-  })
-);
+// app.use(
+//   Router.get('/stops/:aid/:rid', function *(agencyId, routeId) {
+//     this.body = yield agencies[agencyId].populateRoute(routeId);
+//   })
+// );
 
 // Initialize server and events
 nextbus
@@ -76,22 +76,11 @@ function bootstrap(res) {
 }
 
 function registerEvents() {
-  debug('Registering events');
   var manager = new Manager();
-
-  primus.on('leaveroom', function (room, spark) {
-    var clients = primus.room(room).clients();
-    if (!clients.length) {
-      // Kill the worker
-      manager.reap(room);
-    }
-  });
+  debug('Registering events');
 
   primus.on('connection', function (spark) {
     debug('Connected to the socket server');
-
-    // Routes
-    
 
     // Client requests to be registered for all data pertaining
     // to the stop identified in the paylaod
@@ -113,17 +102,40 @@ function registerEvents() {
       var update = event + ':' + 'update';
 
       // Ensure that a client can only recieve updates from one stop
-      spark.leaveAll();
+      spark.leaveAll(function () {
+        debug(spark.id + ' left the rooms ', arguments);
+
+        // Join the target room
+        spark.join(event, function () {
+          debug(spark.id + ' joined the room: ', event);
+        });
+      });
+
       // Join primus room
-      spark.join(spark, event);
+      // spark.join(event, function () {
+      //   debug(spark.id + ' joined the room: ', event);
+      // });
 
       // Make sure there is only one listener for the update event
       // to prevent duplicate events being emitted to clients
       emitter.removeAllListeners(update);
       // Add emitter for worker updates
-      emitter.on(update, function () {
-        if (primus.room)
-        primus.room(event).write(['hiya', payload]);
+      emitter.on(update, function (data) {
+        try {
+          debug('Heard update on %s', event);
+          primus.room(event).clients(function (err, clients) {
+            debug('Clients in room %s', event, clients);
+
+            if (clients.length) {
+              primus.room(event).send(event, JSON.stringify(data));
+              return;
+            }
+
+            manager.reap(event);
+          });
+        } catch (e) {
+          console.error(e.message, e.stack);
+        }
       });
 
       // Spawn worker
@@ -131,4 +143,5 @@ function registerEvents() {
     });
 
   });
+
 }
