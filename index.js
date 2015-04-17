@@ -1,6 +1,7 @@
 
 var koa = require('koa');
 var http = require('http');
+var Router = require('koa-route');
 var serve = require('koa-static');
 var xml2json = require('xml2json');
 var session = require('koa-session');
@@ -26,23 +27,23 @@ app.use(session(app));
 app.use(serve('./public'));
 
 // koa app routes
-// app.use(
-//   Router.get('/agencies', function *() {
-//     this.body = agencies;
-//   })
-// );
+app.use(
+  Router.get('/agencies', function *() {
+    this.body = agencies;
+  })
+);
 
-// app.use(
-//   Router.get('/routes/:aid', function *(agencyId) {
-//     this.body = yield agencies[agencyId].getRoutes();
-//   })
-// );
+app.use(
+  Router.get('/routes/:aid', function *(agencyId) {
+    this.body = yield agencies[agencyId].getRoutes();
+  })
+);
 
-// app.use(
-//   Router.get('/stops/:aid/:rid', function *(agencyId, routeId) {
-//     this.body = yield agencies[agencyId].populateRoute(routeId);
-//   })
-// );
+app.use(
+  Router.get('/stops/:aid/:rid', function *(agencyId, routeId) {
+    this.body = yield agencies[agencyId].populateRoute(routeId);
+  })
+);
 
 // Initialize server and events
 nextbus
@@ -76,6 +77,7 @@ function bootstrap(res) {
 }
 
 function registerEvents() {
+  var self = this;
   var manager = new Manager();
   debug('Registering events');
 
@@ -110,12 +112,7 @@ function registerEvents() {
           debug(spark.id + ' joined the room: ', event);
         });
       });
-
-      // Join primus room
-      // spark.join(event, function () {
-      //   debug(spark.id + ' joined the room: ', event);
-      // });
-
+      
       // Make sure there is only one listener for the update event
       // to prevent duplicate events being emitted to clients
       emitter.removeAllListeners(update);
