@@ -1,0 +1,7 @@
+{
+  "*": {
+    "ip": "https://freegeoip.net/json/",
+    "nextbus": "http://webservices.nextbus.com/service/publicXMLFeed",
+    "google": "https://maps.googleapis.com/maps/api/geocode/json"
+  }
+}
