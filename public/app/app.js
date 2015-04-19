@@ -3,4 +3,7 @@
 var UberApp = angular.module('UberApp', [
   'ipCookie',
   'primus',
-  'timer']);
+  'timer',
+  'uiGmapgoogle-maps',
+  'ngGeolocation'
+]);

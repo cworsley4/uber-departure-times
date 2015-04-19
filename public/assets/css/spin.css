@@ -1,8 +1,8 @@
 .gly-spin {
-  -webkit-animation: spin 2s infinite linear;
-  -moz-animation: spin 2s infinite linear;
-  -o-animation: spin 2s infinite linear;
-  animation: spin 2s infinite linear;
+  -webkit-animation: spin 2s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  -moz-animation: spin 2s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  -o-animation: spin 2s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  animation: spin 2s infinite cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 @-moz-keyframes spin {
   0% {
