@@ -30,6 +30,7 @@ app.use(serve('./public'));
 app.use(
   Router.get('/agencies', function *() {
     this.body = agencies;
+    yield;
   })
 );
 
@@ -52,12 +53,15 @@ nextbus
   .then(bootstrap)
   .then(registerEvents);
 
+// Get the list of agencies
+// Limiting in the long run, see README.md
 function bootstrap(res) {
   try {
     var tempAgencies = {};
     agencies = JSON.parse(xml2json.toJson(res.text));
     agencies = agencies.body.agency;
     
+    // Create new agency for each
     for (var i = 0; i < agencies.length; i++) {
       tempAgencies[agencies[i].tag] = new Agency(agencies[i]);
     }
@@ -68,10 +72,12 @@ function bootstrap(res) {
     return;
   }
 
+  // Boot http server, attach the koa app and bind to port
   var server = http
     .createServer(app.callback())
     .listen(port);
 
+  // Bind the socket library to the http server
   primus = socket(server);
 
   debug('Listening on %d', port);

@@ -48,6 +48,10 @@
       .angular-google-map-container {
         height: 400px;
       }
+
+      li.list-group-item {
+        cursor: pointer;
+      }
     </style>
   </head>
   <body ng-controller="MainController">
@@ -75,18 +79,22 @@
       </div>
       <h5>{{ predictions.title }}</h5>
       <div ng-repeat="prediction in predictions.direction.prediction">
-        <span>Transport {{ $index + 1 }}</span>
-        <timer interval="1000" max-time-unit="'minute'" countdown="prediction.seconds">
-          {{ mminutes }}:{{ sseconds }}
-        </timer>
+        <h5>
+          Transport {{ $index + 1 }} Departing In:
+          <timer interval="1000" max-time-unit="'minute'" countdown="prediction.seconds">
+            {{ mminutes }}:{{ sseconds }}
+          </timer>
+        </h5>
       </div>
     </div>
 
-    <pre id="predictions-data">
-      {{ predictions.direction.prediction | json }}
-      {{ predictions | json }}
-    </pre>
-
+    <!--
+      <pre id="predictions-data">
+        {{ predictions.direction.prediction | json }}
+        {{ predictions | json }}
+      </pre>
+    -->
+  
     <div class="steps container" ng-switch="step" ng-show="!wait">
       <button class="btn btn-default btn-sm" ng-disable ng-click="back()"><< Previous Step</button>
 
@@ -95,6 +103,7 @@
 
       <div ng-switch-when="1">
         <ul class="list-group container" id="step1">
+          <li class="list-group-item" ng-click="selectAgency({tag:'sf-muni'})">San Francisco (Muni)</li>
           <li ng-repeat="agency in agencies | filter:search" ng-click="selectAgency(agency)" class="list-group-item">{{ agency.title }}</li>
         </ul>
       </div>
