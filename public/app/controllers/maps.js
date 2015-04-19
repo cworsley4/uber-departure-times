@@ -1,5 +1,8 @@
 
 // TODO: Should probably be a directive
+// 
+// uiGmapGoogleMapApi module throws a lot of errors
+// I wouldn't normally go to production with
 UberApp.controller('MapsController', function (
   $rootScope,
   $scope,
@@ -7,9 +10,7 @@ UberApp.controller('MapsController', function (
   uiGmapGoogleMapApi,
   $geolocation
 ) {
-  $scope.map = {
-    center: {}
-  };
+  $scope.map = {};
 
   $geolocation.getCurrentPosition()
     .then(function (location) {
@@ -107,9 +108,5 @@ UberApp.controller('MapsController', function (
 
     $scope.markers = markers;
     $scope.map.bounds = bounds;
-  });
-
-  uiGmapGoogleMapApi.then(function(maps) {
-    $rootScope.$emit('gmapsReady');
   });
 });

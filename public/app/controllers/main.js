@@ -24,6 +24,7 @@ UberApp.controller('MainController', function (
     $scope.wait = false;
   });
 
+  // We need to resubscribe to this data if the server bounces
   primus.$on('reconnect', function () {
     if (subscriptionData) {
       primus.send('subscribe:stop', subscriptionData);

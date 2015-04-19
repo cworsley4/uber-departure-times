@@ -68,7 +68,7 @@
       </ui-gmap-google-map>
     </div>
 
-    <div id="predictions">
+    <div id="predictions" ng-show="!wait">
       <span class="glyphicon glyphicon-refresh gly-spin spinner" ng-show="loading"></span>
       <div ng-show="predictions.dirTitleBecauseNoPredictions">
         <h4>It doesn't look like there are any predictions to show here. Sorry!</h4>
@@ -87,8 +87,8 @@
       {{ predictions | json }}
     </pre>
 
-    <div class="steps container" ng-switch="step">
-      <button class="btn btn-default btn-sm" ng-click="back()"><< Previous Step</button>
+    <div class="steps container" ng-switch="step" ng-show="!wait">
+      <button class="btn btn-default btn-sm" ng-disable ng-click="back()"><< Previous Step</button>
 
       <br />
       <br />
