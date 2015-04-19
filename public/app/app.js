@@ -1,3 +1,6 @@
 
 // Global
-var UberApp = angular.module('UberApp', ['ipCookie', 'primus']);
+var UberApp = angular.module('UberApp', [
+  'ipCookie',
+  'primus',
+  'timer']);

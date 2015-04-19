@@ -127,11 +127,15 @@ function registerEvents() {
           primus.room(event).clients(function (err, clients) {
             debug('Clients in room %s', event, clients);
 
+            // There there are people in the room then send
+            // the data down. Otherwise, retire the worker
+            // from service
             if (clients.length) {
-              primus.room(event).send(event, JSON.stringify(data));
+              primus.room(event).send(event, data);
               return;
             }
 
+            // Remove worker
             manager.reap(event);
           });
         } catch (e) {
