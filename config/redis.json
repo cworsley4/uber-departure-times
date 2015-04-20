@@ -1,9 +1,0 @@
-{
-  "*": {},
-  "production": {
-    "url": "pub-redis-13141.us-east-1-3.4.ec2.garantiadata.com",
-    "port": "13141",
-    "username": "rediscloud",
-    "password": "s8pTW5ByhfEtdGU4"
-  }
-}
