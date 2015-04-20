@@ -18,7 +18,6 @@ var config = require('envcfg')(__dirname + '/config/api.json');
 var primus;
 var agencies;
 var port = process.env.PORT || 3000;
-var routes = require('./lib/routes');
 
 var app = koa();
 app.keys = ['hire Cecil Worsley :)'];
