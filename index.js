@@ -49,8 +49,7 @@ app.use(
 nextbus
   .agencies()
   .exec()
-  .then(bootstrap)
-  .then(sockets);
+  .then(bootstrap);
 
 // Get the list of agencies
 // Limiting in the long run, see README.md
@@ -78,6 +77,7 @@ function bootstrap(res) {
 
   // Bind the socket library to the http server
   primus = socket(server);
+  sockets(primus);
 
   debug('Listening on %d', port);
 }
