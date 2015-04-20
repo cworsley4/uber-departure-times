@@ -30,7 +30,6 @@ app.use(serve('./public'));
 app.use(
   Router.get('/agencies', function *() {
     this.body = agencies;
-    yield;
   })
 );
 
