@@ -14,6 +14,9 @@
   "keywords": [
     "uber"
   ],
+  "engines": {
+    "iojs": "1.6.x"
+  },
   "author": "Cecil Worsley <cecilworsley4@gmail.com>",
   "license": "MIT",
   "bugs": {
